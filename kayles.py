@@ -12,6 +12,10 @@ lose=set()
 # kill is the number of pieces that can be taken from the selected heap
 kill=[1,2]
 
+# Debug flag for showing internal process
+dbg = False
+
+
 # heap array is a list of the number of heaps of different sizes
 # big-endian
 # i.e. [2,0,1] is 2 heaps of 3 and 1 heap of one
@@ -33,14 +37,17 @@ def StartWithNonempty(heapArray):
 def TestHeapAray(heapArray):
     StartWithNonempty(heapArray)
     rp=repr(heapArray)
-    # print("Eval "+rp)
+    if dbg:
+        print("Eval "+rp)
 
     # Position already known?
     if rp in win:
-        print("Fast win "+rp)
+        if dbg:
+            print("Fast win "+rp)
         return "W"
     if rp in lose:
-        print("Fast lose "+rp)
+        if dbg:
+            print("Fast lose "+rp)
         return "L"
 
     # Try all legal moves
@@ -79,25 +86,54 @@ def TestHeapAray(heapArray):
                 if TestHeapAray(modHeapArray) == "L":
                     # made other guy a loser
                     win[rp] = (heapSize,k,subheap1)
-                    print("Slow win "+rp)
+                    if dbg:
+                        print("Slow win "+rp)
                     return "W"
     # no good moves -- I'm a loser
     lose.add(rp)
-    print("Slow lose "+rp)
+    if dbg:
+        print("Slow lose "+rp)
     return "L"
 
+def CommandLine():
+    cl = argparse.ArgumentParser(description="Solve Kayles game from Winning Ways for Your Mathematical Plays\n{c} Paul H Alfille 2019")
+    cl.add_argument("H",help="Size of initial large heap (default = 25)",type=int,nargs="?",default=25)
+    cl.add_argument("-L","--lose",help="Show losing positions found",action="store_true")
+    cl.add_argument("-W","--win",help="Show winning positions with correct move triplet (heapsize,killsize,split_heapsize)",action="store_true")
+    cl.add_argument("-D","--debug",help="Debug -- show progress through analysis",action="store_true")
+    cl.add_argument("-R","--reverse",help="Reverse rule -- no moves is a WIN",action="store_true")
+    return cl.parse_args()
 
-def main():
-    # salt the problem
-    lose.add(repr([]))
-        
-    TestHeapAray(SingleHeapArray(25))
-    print("lose")
-    print(sorted(list(lose)))
+
+def main(args):
+
+    args = CommandLine()
+    dbg = args.debug
     
-    for w in sorted(list(win)):
-        print("{}\t->\t{}".format(w,win[w]))
+    # salt the problem
+    if args.reverse:
+        win[repr([])]="Finished"
+    else:
+        lose.add(repr([]))
+        
+    if args.H < 1:
+        print("Starting haeap size must be a positive number, of course")
+        return
+        
+    value = TestHeapAray(SingleHeapArray(args.H))
+
+    if args.lose:
+        print("lose")
+        print(sorted(list(lose)))
+    
+    if args.win:
+        for w in sorted(list(win)):
+            print("{}\t->\t{}".format(w,win[w]))
+
+    print("Kayles with initial heap size of {} is a {}".format(args.H,value))
 
 if __name__ == "__main__":
+    import sys
+    import argparse
     # execute only if run as a script
-    main()
+    sys.exit(main(sys.argv))
