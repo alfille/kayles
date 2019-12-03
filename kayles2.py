@@ -1,12 +1,14 @@
 #/usr/bin/python3
 
+# by Paul Alfille
+# with guidance from Kendrick Shaw
 
 # solve game from winning ways for your mathematical plays
 
 #Win is a dict with the repr of the position as the index and the winning move as the value
 win={}
 
-# lose is a set of losing positions with the repr of the position as the index (set member)
+# lose is a set of losing positions with teh repr of the position as the index (set member)
 lose=set()
 
 # kill is the number of pieces that can be taken from the selected heap
@@ -59,17 +61,21 @@ def TestHeapAray(heapArray):
             continue
             
         heapSize = heaparrayLength-i
-        for k in kill: 
-            #loop through kill sizes
+        halfHeap = heapSize // 2 ;
+        for subheap1 in range(halfHeap,-1,-1):
+        
+            for k in kill: 
+                #loop through kill sizes
             
-            if k > heapSize:
-                # heap size too small for this kill size
-                continue
+                if k > heapSize:
+                    # heap size too small for this kill size
+                    break
                 
-            for subheap1 in range(heapSize-k+1): 
-                #loop through splits
                 subheap2=heapSize-k-subheap1
                 
+                if subheap2 < 0:
+                    continue
+
                 if subheap2 > subheap1: 
                     #redundant by symmetry
                     continue
