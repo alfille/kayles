@@ -97,11 +97,13 @@ def TestHeapAray(heapArray):
 
 def CommandLine():
     cl = argparse.ArgumentParser(description="Solve Kayles game from Winning Ways for Your Mathematical Plays\n{c} Paul H Alfille 2019")
-    cl.add_argument("H",help="Size of initial large heap (default = 25)",type=int,nargs="?",default=25)
+    cl.add_argument("S",help="Size[s] of initial large heap",type=int,nargs="*",default=[25])
     cl.add_argument("-L","--lose",help="Show losing positions found",action="store_true")
-    cl.add_argument("-W","--win",help="Show winning positions with correct move triplet (heapsize,killsize,split_heapsize)",action="store_true")
+    cl.add_argument("-W","--win",help="Show winning positions with correct move triplet (heapsize,killsize,biggest split_heapsize)",action="store_true")
     cl.add_argument("-D","--debug",help="Debug -- show progress through analysis",action="store_true")
     cl.add_argument("-R","--reverse",help="Reverse rule -- no moves is a WIN",action="store_true")
+    cl.add_argument("-H","--heaps",help="Initial Heap Distribution",type=list,nargs="?")
+    
     return cl.parse_args()
 
 
@@ -116,21 +118,25 @@ def main(args):
     else:
         lose.add(repr([]))
         
-    if args.H < 1:
-        print("Starting haeap size must be a positive number, of course")
-        return
+    print(args.H)
         
-    value = TestHeapAray(SingleHeapArray(args.H))
+    for S in args.S:
+        if S < 1:
+            print("Starting heap size must be a positive number, of course")
+            return
+            
+        value = TestHeapAray(SingleHeapArray(S))
 
-    if args.lose:
-        print("lose")
-        print(sorted(list(lose)))
-    
-    if args.win:
-        for w in sorted(list(win)):
-            print("{}\t->\t{}".format(w,win[w]))
+        if args.lose:
+            print("lose")
+            print(sorted(list(lose)))
+        
+        if args.win:
+            for w in sorted(list(win)):
+                print("{}\t->\t{}".format(w,win[w]))
 
-    print("Kayles with initial heap size of {} is a {}".format(args.H,value))
+        print("Kayles with initial heap size of {} is a {}".format(S,value))
+
 
 if __name__ == "__main__":
     import sys
