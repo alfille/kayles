@@ -95,6 +95,43 @@ def TestHeapAray(heapArray):
         print("Slow lose "+rp)
     return "L"
 
+def HeapArrayMove( ha, mov ):
+    ham = ha.copy()
+    hal = len(ha)
+    h1 = mov[2]
+    h2 = mov[0] - mov[1] - h1
+    ham[hal-mov[0]] -= 1
+    if h1 > 0 :
+        ham[hal-h1] += 1
+    if h2 > 0 :
+        ham[hal-h2] += 1
+    return ham
+
+def List2HeapArray( lisst ):
+    ha = []
+    for l in lisst:
+        while len(ha) < l:
+            ha.insert(0,0)
+        ha[len(ha)-l] += 1
+    return ha
+
+def HAstring2HeapArray(ha_string):
+    if ha_string=='[]':
+        return []
+    return list(map(int,ha_string[1:-1].split(",")))
+
+def HeapArray2List(ha):
+    l=[]
+    for i,h in enumerate(ha):
+        if h == 0:
+            continue
+        elif h == 1:
+            l.append(len(ha)-i)
+        else:
+            l.append(str(len(ha)-i)+'*'+str(h))
+    return l
+    
+
 def CommandLine():
     cl = argparse.ArgumentParser(description="Solve Kayles game from Winning Ways for Your Mathematical Plays\n{c} Paul H Alfille 2019")
     cl.add_argument("S",help="Size[s] of initial large heap",type=int,nargs="*",default=[25])
@@ -102,10 +139,20 @@ def CommandLine():
     cl.add_argument("-W","--win",help="Show winning positions with correct move triplet (heapsize,killsize,biggest split_heapsize)",action="store_true")
     cl.add_argument("-D","--debug",help="Debug -- show progress through analysis",action="store_true")
     cl.add_argument("-R","--reverse",help="Reverse rule -- no moves is a WIN",action="store_true")
-    cl.add_argument("-H","--heaps",help="Initial Heap Distribution",type=list,nargs="?")
+    cl.add_argument("-H","--heaps",help="Initial Heap Distribution",nargs="*",default=[])
     
     return cl.parse_args()
 
+def ShowWins():
+    print("Winning positions:")
+    for w in sorted(list(win)):
+        ha = HAstring2HeapArray(w)
+        print("{}\t->\t{}\t->\t{}".format(HeapArray2List(ha),win[w],HeapArray2List(HeapArrayMove(ha,win[w]))))
+
+def ShowLosses():
+    print("Losing positions:")
+    for l in sorted(list(lose)):
+        print(HeapArray2List(HAstring2HeapArray(l)))
 
 def main(args):
 
@@ -118,7 +165,21 @@ def main(args):
     else:
         lose.add(repr([]))
         
-    print(args.H)
+    if args.heaps:
+        print(args.heaps)
+        heaps = []
+        for h in args.heaps:
+            heaps.append(int(h))
+        value = TestHeapAray(List2HeapArray(heaps))
+
+        if args.lose:
+            ShowLosses()
+        
+        if args.win:
+            ShowWins()
+
+        print("Kayles with initial heap of {} is a {}".format(heaps,value))
+        return
         
     for S in args.S:
         if S < 1:
@@ -128,18 +189,18 @@ def main(args):
         value = TestHeapAray(SingleHeapArray(S))
 
         if args.lose:
-            print("lose")
-            print(sorted(list(lose)))
+            ShowLosses()
         
         if args.win:
-            for w in sorted(list(win)):
-                print("{}\t->\t{}".format(w,win[w]))
+            ShowWins()
 
         print("Kayles with initial heap size of {} is a {}".format(S,value))
+        return
 
 
 if __name__ == "__main__":
     import sys
     import argparse
+    import re
     # execute only if run as a script
     sys.exit(main(sys.argv))
